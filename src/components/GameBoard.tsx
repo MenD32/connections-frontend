@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { WordGroup } from '@/types/game';
 import { useConnections } from '@/hooks/useConnections';
-import { ChevronLeft, RotateCcw, Share2, Check } from 'lucide-react';
+import { ChevronLeft, Shuffle, Share2, Check } from 'lucide-react';
 import { generateShareText, copyToClipboard } from '@/lib/shareUtils';
 import { samplePuzzle } from '@/data/puzzles';
 import { useState } from 'react';
@@ -116,10 +116,10 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
           <Button
             variant="ghost"
             size="sm"
-            onClick={resetGame}
+            onClick={shuffleWords}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 -mr-2"
           >
-            <RotateCcw className="w-4 h-4" />
+            <Shuffle className="w-4 h-4" />
           </Button>
         </div>
       </div>
