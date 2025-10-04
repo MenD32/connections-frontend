@@ -3,7 +3,6 @@ import { WordGroup } from '@/types/game';
 import { useConnections } from '@/hooks/useConnections';
 import { ChevronLeft, Shuffle, Share2, Check } from 'lucide-react';
 import { generateShareText, copyToClipboard } from '@/lib/shareUtils';
-import { samplePuzzle } from '@/data/puzzles';
 import { useState } from 'react';
 
 // Helper function to calculate translation between grid positions
@@ -35,6 +34,9 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
   
   const {
     gameState,
+    isLoading,
+    error,
+    loadPuzzle,
     lastGuessResult,
     newlySolvedGroup,
     animatingWords,
@@ -47,14 +49,42 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
     toggleHints
   } = useConnections();
 
-  const getCurrentDate = () => {
-    const today = new Date();
-    return today.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+  // Early returns for loading and error states
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-2xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading puzzle...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full max-w-2xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">{error}</p>
+            <Button onClick={() => loadPuzzle()}>Try Again</Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!gameState) {
+    return (
+      <div className="w-full max-w-2xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-center h-64">
+          <p className="text-gray-600">No puzzle data available</p>
+        </div>
+      </div>
+    );
+  }
 
   const isWordSolved = (word: string) => {
     return gameState.solvedGroups.some(group => group.words.includes(word));
@@ -75,7 +105,7 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
   const canSubmit = gameState.selectedWords.length === 4 && gameState.gameStatus === 'playing' && !isAnimating;
 
   const handleShare = async () => {
-    const shareText = generateShareText(gameState, samplePuzzle.puzzleNumber);
+    const shareText = generateShareText(gameState, gameState.puzzleNumber);
     const success = await copyToClipboard(shareText);
     
     if (success) {
@@ -110,7 +140,7 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
 
           <div className="text-center">
             <h1 className="text-xl font-bold text-gray-900">Connections</h1>
-            <p className="text-xs text-gray-500">{getCurrentDate()}</p>
+            <p className="text-xs text-gray-500">{gameState.puzzleDate}</p>
           </div>
 
           <Button

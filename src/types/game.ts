@@ -20,6 +20,8 @@ export interface GameState {
   gameStatus: 'playing' | 'won' | 'lost';
   showHints: boolean;
   guessHistory: GuessResult[];
+  puzzleNumber: number;
+  puzzleDate: string;
 }
 
 export interface PuzzleData {
