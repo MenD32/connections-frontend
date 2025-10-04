@@ -9,9 +9,12 @@ WORKDIR /app
 # Install dependencies based on the preferred package manager
 COPY package.json bun.lock* package-lock.json* ./
 RUN \
-  if [ -f bun.lock ]; then npm install -g bun && bun install --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci --only=production; \
-  else echo "No lockfile found." && exit 1; \
+  if [ -f bun.lock ]; then \
+    npm install -g bun && bun install; \
+  elif [ -f package-lock.json ]; then \
+    npm ci; \
+  else \
+    echo "No lockfile found." && exit 1; \
   fi
 
 # Rebuild the source code only when needed
@@ -25,8 +28,10 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 # Build the application for static export
 RUN \
-  if [ -f bun.lock ]; then npm install -g bun && bun run build; \
-  else npm run build; \
+  if [ -f bun.lock ]; then \
+    npm install -g bun && bun run build; \
+  else \
+    npm run build; \
   fi
 
 # Production image with nginx to serve static files

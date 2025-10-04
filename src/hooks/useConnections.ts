@@ -13,8 +13,24 @@ export function useConnections() {
       setIsLoading(true);
       setError(null);
       
-      // Fetch directly from the backend API
-      const apiHost = process.env.NEXT_PUBLIC_CONNECTIONS_API_HOST || 'localhost:8000';
+      // Get API host from runtime config or fallback to localhost
+      let apiHost = 'localhost:8000';
+      
+      // Try to get runtime config (available in browser)
+      if (typeof window !== 'undefined') {
+        try {
+          const configResponse = await fetch('/config.js');
+          const configText = await configResponse.text();
+          const configMatch = configText.match(/window\.ENV\s*=\s*{[^}]*CONNECTIONS_API_HOST:\s*['"]([^'"]+)['"]/);
+          if (configMatch) {
+            apiHost = configMatch[1];
+          }
+        } catch (e) {
+          // Runtime config not available, use fallback
+          console.log('Runtime config not available, using fallback API host');
+        }
+      }
+      
       const now = new Date();
       const targetDate = date || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`; // Use provided date or today's date (YYYY-MM-DD)
       
@@ -39,20 +55,39 @@ export function useConnections() {
         hardest: '#b19cd9'  // Purple
       };
       
+      // Type the external API response
+      interface ExternalCard {
+        content: string;
+        position: number;
+      }
+      
+      interface ExternalCategory {
+        title: string;
+        cards: ExternalCard[];
+      }
+      
+      interface ExternalPuzzleData {
+        date: string;
+        id: string;
+        categories: ExternalCategory[];
+      }
+      
+      const typedExternalData = externalData as ExternalPuzzleData;
+      
       const puzzleData: PuzzleData = {
-        date: new Date(externalData.date).toLocaleDateString('en-US', {
+        date: new Date(typedExternalData.date).toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric'
         }),
-        puzzleNumber: parseInt(externalData.id) || 1,
-        groups: externalData.categories.map((category: any, index: number) => {
+        puzzleNumber: parseInt(typedExternalData.id) || 1,
+        groups: typedExternalData.categories.map((category, index: number) => {
           // Sort cards by position to get original word order
-          const sortedCards = [...category.cards].sort((a: any, b: any) => a.position - b.position);
+          const sortedCards = [...category.cards].sort((a, b) => a.position - b.position);
           
           return {
             category: category.title,
-            words: sortedCards.map((card: any) => card.content),
+            words: sortedCards.map((card) => card.content),
             difficulty: difficultyMap[index] || 'easy',
             color: colorMap[difficultyMap[index] || 'easy']
           };
