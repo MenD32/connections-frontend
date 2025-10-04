@@ -1,18 +1,18 @@
-# Use the official Node.js 18 image as base
-FROM node:18-alpine AS base
+# Multi-stage build for Next.js static export
+FROM node:20-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat sqlite
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
-COPY package.json bun.lock* ./
-RUN if [ -f bun.lock ]; then \
-    npm install -g bun && bun install --frozen-lockfile; \
-    else echo "Lockfile not found." && exit 1; \
-    fi
+COPY package.json bun.lock* package-lock.json* ./
+RUN \
+  if [ -f bun.lock ]; then npm install -g bun && bun install --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then npm ci --only=production; \
+  else echo "No lockfile found." && exit 1; \
+  fi
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -21,49 +21,38 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Build the application
-RUN if [ -f bun.lock ]; then npm install -g bun && bun run build; else npm run build; fi
+# Build the application for static export
+RUN \
+  if [ -f bun.lock ]; then npm install -g bun && bun run build; \
+  else npm run build; \
+  fi
 
-# Production image, copy all the files and run next
-FROM base AS runner
-WORKDIR /app
+# Production image with nginx to serve static files
+FROM nginx:alpine AS runner
+WORKDIR /usr/share/nginx/html
 
-ENV NODE_ENV production
-# Uncomment the following line in case you want to disable telemetry during runtime.
-ENV NEXT_TELEMETRY_DISABLED 1
+# Remove default nginx static assets
+RUN rm -rf ./*
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+# Copy the built application from builder stage
+COPY --from=builder /app/out ./
 
-# Install SQLite for runtime
-RUN apk add --no-cache sqlite
+# Copy nginx configuration and entrypoint script
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
-# Create data directory for SQLite database
-RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
+# Install curl for health checks
+RUN apk add --no-cache curl
 
-COPY --from=builder /app/public ./public
+# Expose port 80
+EXPOSE 80
 
-# Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost/ || exit 1
 
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-USER nextjs
-
-EXPOSE 3000
-
-ENV PORT 3000
-# set hostname to localhost
-ENV HOSTNAME "0.0.0.0"
-
-# server.js is created by next build from the standalone output
-# https://nextjs.org/docs/pages/api-reference/next-config-js/output
-CMD ["node", "server.js"]
+# Use custom entrypoint for runtime configuration
+ENTRYPOINT ["/docker-entrypoint.sh"]
