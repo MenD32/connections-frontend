@@ -230,7 +230,7 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
                 <h2 className="text-3xl font-bold text-green-600 mb-2 animate-bounce">Perfect!</h2>
                 <p className="text-gray-600">You solved today's puzzle!</p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="flex justify-center">
                 <Button
                   onClick={handleShare}
                   variant="outline"
@@ -247,12 +247,6 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
                       Share
                     </>
                   )}
-                </Button>
-                <Button
-                  onClick={resetGame}
-                  className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-3 rounded-full font-medium transition-all hover:scale-105"
-                >
-                  Play Again
                 </Button>
               </div>
             </div>
@@ -274,7 +268,7 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
                   ))}
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="flex justify-center">
                 <Button
                   onClick={handleShare}
                   variant="outline"
@@ -291,12 +285,6 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
                       Share
                     </>
                   )}
-                </Button>
-                <Button
-                  onClick={resetGame}
-                  className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-3 rounded-full font-medium transition-all hover:scale-105"
-                >
-                  Try Again
                 </Button>
               </div>
             </div>
