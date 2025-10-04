@@ -17,7 +17,7 @@ export function useConnections() {
     };
   });
 
-  const [lastGuessResult, setLastGuessResult] = useState<'correct' | 'incorrect' | null>(null);
+  const [lastGuessResult, setLastGuessResult] = useState<'correct' | 'incorrect' | 'one-away' | null>(null);
   const [newlySolvedGroup, setNewlySolvedGroup] = useState<string | null>(null);
   const [animatingWords, setAnimatingWords] = useState<{
     word: string;
@@ -33,6 +33,16 @@ export function useConnections() {
       guess.words.every(word => words.includes(word)) &&
       words.every(word => guess.words.includes(word))
     );
+  };
+
+  // Helper function to check if a guess is "one away" from a correct group
+  const isOneAway = (selectedWords: string[], groups: WordGroup[], solvedGroups: WordGroup[]) => {
+    const unsolvedGroups = groups.filter(group => !solvedGroups.includes(group));
+    
+    return unsolvedGroups.some(group => {
+      const matches = selectedWords.filter(word => group.words.includes(word));
+      return matches.length === 3; // Exactly 3 out of 4 words match
+    });
   };
 
   const selectWord = useCallback((word: string) => {
@@ -167,9 +177,12 @@ export function useConnections() {
           selectedWords: []
         };
       } else {
-        // Incorrect guess - trigger shake animation
-        setLastGuessResult('incorrect');
-        setTimeout(() => setLastGuessResult(null), 600);
+        // Check if the guess is "one away" from a correct group
+        const oneAway = isOneAway(prev.selectedWords, prev.groups, prev.solvedGroups);
+        
+        // Incorrect guess - trigger shake animation and check for "one away"
+        setLastGuessResult(oneAway ? 'one-away' : 'incorrect');
+        setTimeout(() => setLastGuessResult(null), oneAway ? 3600 : 600);
 
         const newMistakes = prev.mistakesRemaining - 1;
         const newGameStatus = newMistakes === 0 ? 'lost' : 'playing';

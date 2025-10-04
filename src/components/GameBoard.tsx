@@ -86,6 +86,15 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
+      {/* One Away Pop-up */}
+      {lastGuessResult === 'one-away' && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-one-away">
+          <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-6 py-3 rounded-lg font-medium text-sm shadow-lg">
+            One away!
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white border-b border-gray-200 p-4 sticky top-0 z-10">
         <div className="max-w-lg mx-auto flex items-center justify-between">
@@ -139,7 +148,7 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
             <div
               className={`grid grid-cols-4 gap-2 transition-all duration-300 ${
                 gameState.solvedGroups.length > 0 ? '' : ''
-              } ${lastGuessResult === 'incorrect' ? 'animate-shake' : ''}`}
+              } ${(lastGuessResult === 'incorrect' || lastGuessResult === 'one-away') ? 'animate-shake' : ''}`}
               style={{
                 marginTop: gameState.solvedGroups.length >= 0 ? '8px' : undefined
               }}
@@ -153,7 +162,7 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
                     isSelected={isWordSelected(word)}
                     animation={getWordAnimation(word)}
                     onClick={() => selectWord(word)}
-                    shake={lastGuessResult === 'incorrect' && isWordSelected(word)}
+                    shake={(lastGuessResult === 'incorrect' || lastGuessResult === 'one-away') && isWordSelected(word)}
                   />
                 ))}
             </div>
