@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { GameState, WordGroup } from '@/types/game';
+import { GameState, WordGroup, GuessResult } from '@/types/game';
 import { samplePuzzle, shuffleArray } from '@/data/puzzles';
 
 export function useConnections() {
@@ -12,7 +12,8 @@ export function useConnections() {
       solvedGroups: [],
       mistakesRemaining: 4,
       gameStatus: 'playing',
-      showHints: false
+      showHints: false,
+      guessHistory: []
     };
   });
 
@@ -130,7 +131,12 @@ export function useConnections() {
             solvedGroups: newSolvedGroups,
             allWords: [...solvedWords, ...remainingWords],
             selectedWords: [],
-            gameStatus: newGameStatus
+            gameStatus: newGameStatus,
+            guessHistory: [...current.guessHistory, {
+              words: [...prev.selectedWords],
+              isCorrect: true,
+              solvedGroup: matchingGroup
+            }]
           }));
           
           // Clean up animation
@@ -156,7 +162,11 @@ export function useConnections() {
           ...prev,
           selectedWords: [],
           mistakesRemaining: newMistakes,
-          gameStatus: newGameStatus
+          gameStatus: newGameStatus,
+          guessHistory: [...prev.guessHistory, {
+            words: [...prev.selectedWords],
+            isCorrect: false
+          }]
         };
       }
     });
@@ -171,7 +181,8 @@ export function useConnections() {
       solvedGroups: [],
       mistakesRemaining: 4,
       gameStatus: 'playing',
-      showHints: false
+      showHints: false,
+      guessHistory: []
     });
     setLastGuessResult(null);
     setNewlySolvedGroup(null);

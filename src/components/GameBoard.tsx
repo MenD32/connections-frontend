@@ -1,7 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { WordGroup } from '@/types/game';
 import { useConnections } from '@/hooks/useConnections';
-import { ChevronLeft, RotateCcw } from 'lucide-react';
+import { ChevronLeft, RotateCcw, Share2, Check } from 'lucide-react';
+import { generateShareText, copyToClipboard } from '@/lib/shareUtils';
+import { samplePuzzle } from '@/data/puzzles';
+import { useState } from 'react';
 
 // Helper function to calculate translation between grid positions
 const calculateTranslate = (fromIndex: number, toIndex: number) => {
@@ -28,6 +31,8 @@ interface GameBoardProps {
 }
 
 export function GameBoard({ onBackToMenu }: GameBoardProps) {
+  const [copied, setCopied] = useState(false);
+  
   const {
     gameState,
     lastGuessResult,
@@ -68,6 +73,16 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
   };
 
   const canSubmit = gameState.selectedWords.length === 4 && gameState.gameStatus === 'playing' && !isAnimating;
+
+  const handleShare = async () => {
+    const shareText = generateShareText(gameState, samplePuzzle.puzzleNumber);
+    const success = await copyToClipboard(shareText);
+    
+    if (success) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -123,8 +138,11 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
           {gameState.gameStatus === 'playing' && gameState.allWords.filter(word => !isWordSolved(word)).length > 0 && (
             <div
               className={`grid grid-cols-4 gap-2 transition-all duration-300 ${
-                lastGuessResult === 'incorrect' ? 'animate-shake' : ''
-              }`}
+                gameState.solvedGroups.length > 0 ? '' : ''
+              } ${lastGuessResult === 'incorrect' ? 'animate-shake' : ''}`}
+              style={{
+                marginTop: gameState.solvedGroups.length >= 0 ? '8px' : undefined
+              }}
             >
               {gameState.allWords
                 .filter(word => !isWordSolved(word))
@@ -199,12 +217,31 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
                 <h2 className="text-3xl font-bold text-green-600 mb-2 animate-bounce">Perfect!</h2>
                 <p className="text-gray-600">You solved today's puzzle!</p>
               </div>
-              <Button
-                onClick={resetGame}
-                className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-3 rounded-full font-medium transition-all hover:scale-105"
-              >
-                Play Again
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  onClick={handleShare}
+                  variant="outline"
+                  className="bg-white hover:bg-gray-50 text-gray-900 px-6 py-3 rounded-full font-medium transition-all hover:scale-105 flex items-center gap-2"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="w-4 h-4" />
+                      Share
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={resetGame}
+                  className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-3 rounded-full font-medium transition-all hover:scale-105"
+                >
+                  Play Again
+                </Button>
+              </div>
             </div>
           )}
 
@@ -224,12 +261,31 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
                   ))}
               </div>
 
-              <Button
-                onClick={resetGame}
-                className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-3 rounded-full font-medium transition-all hover:scale-105"
-              >
-                Try Again
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  onClick={handleShare}
+                  variant="outline"
+                  className="bg-white hover:bg-gray-50 text-gray-900 px-6 py-3 rounded-full font-medium transition-all hover:scale-105 flex items-center gap-2"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="w-4 h-4" />
+                      Share
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={resetGame}
+                  className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-3 rounded-full font-medium transition-all hover:scale-105"
+                >
+                  Try Again
+                </Button>
+              </div>
             </div>
           )}
 
@@ -307,7 +363,7 @@ function SolvedGroup({ group, animate, delay }: {
 }) {
   return (
     <div
-      className={`p-4 rounded-lg text-center shadow-sm border transition-all duration-500 ${
+      className={`p-2.5 rounded-lg text-center shadow-sm border transition-all duration-500 ${
         animate ? 'animate-pop-up' : ''
       }`}
       style={{
@@ -315,7 +371,7 @@ function SolvedGroup({ group, animate, delay }: {
         animationDelay: delay ? `${delay}ms` : '0ms'
       }}
     >
-      <h3 className="font-bold text-gray-900 text-sm mb-1 uppercase tracking-wide">
+      <h3 className="font-bold text-gray-900 text-sm uppercase tracking-wide mb-1">
         {group.category}
       </h3>
       <p className="text-gray-800 text-sm font-medium">

@@ -5,6 +5,12 @@ export interface WordGroup {
   color: string;
 }
 
+export interface GuessResult {
+  words: string[];
+  isCorrect: boolean;
+  solvedGroup?: WordGroup;
+}
+
 export interface GameState {
   groups: WordGroup[];
   allWords: string[];
@@ -13,6 +19,7 @@ export interface GameState {
   mistakesRemaining: number;
   gameStatus: 'playing' | 'won' | 'lost';
   showHints: boolean;
+  guessHistory: GuessResult[];
 }
 
 export interface PuzzleData {
