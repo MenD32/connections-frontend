@@ -182,7 +182,7 @@ export function useConnections() {
         
         // Incorrect guess - trigger shake animation and check for "one away"
         setLastGuessResult(oneAway ? 'one-away' : 'incorrect');
-        setTimeout(() => setLastGuessResult(null), oneAway ? 3600 : 600);
+        setTimeout(() => setLastGuessResult(null), oneAway ? 1600 : 600);
 
         const newMistakes = prev.mistakesRemaining - 1;
         const newGameStatus = newMistakes === 0 ? 'lost' : 'playing';

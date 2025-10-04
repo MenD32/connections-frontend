@@ -161,19 +161,19 @@
   @keyframes oneAwayPopup {
     0% {
       opacity: 0;
-      transform: translateY(-10px) scale(0.9);
+      transform: translateX(-50%) translateY(-10px) scale(0.9);
     }
     3% {
       opacity: 1;
-      transform: translateY(0) scale(1);
+      transform: translateX(-50%) translateY(0) scale(1);
     }
     80% {
       opacity: 1;
-      transform: translateY(0) scale(1);
+      transform: translateX(-50%) translateY(0) scale(1);
     }
     100% {
       opacity: 0;
-      transform: translateY(-10px) scale(0.9);
+      transform: translateX(-50%) translateY(-10px) scale(0.9);
     }
   }
 
@@ -234,7 +234,7 @@
   }
 
   .animate-one-away {
-    animation: oneAwayPopup 3.5s ease-in-out forwards;
+    animation: oneAwayPopup 1.5s ease-in-out forwards;
   }
 
   .animate-fill-gaps {

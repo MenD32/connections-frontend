@@ -88,8 +88,8 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
     <div className="min-h-screen bg-white flex flex-col">
       {/* One Away Pop-up */}
       {lastGuessResult === 'one-away' && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-one-away">
-          <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-6 py-3 rounded-lg font-medium text-sm shadow-lg">
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-one-away">
+          <div className="bg-black text-white px-6 py-3 rounded-lg font-medium text-sm shadow-lg">
             One away!
           </div>
         </div>
