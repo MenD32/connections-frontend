@@ -4,7 +4,7 @@ import { samplePuzzle, shuffleArray } from '@/data/puzzles';
 
 export function useConnections() {
   const [gameState, setGameState] = useState<GameState>(() => {
-    const allWords = shuffleArray(samplePuzzle.groups.flatMap(group => group.words));
+    const allWords = samplePuzzle.groups.flatMap(group => group.words);
     return {
       groups: samplePuzzle.groups,
       allWords,
@@ -25,6 +25,15 @@ export function useConnections() {
     toIndex: number;
   }[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
+
+  // Helper function to check if a guess already exists
+  const guessExists = (guessHistory: GuessResult[], words: string[]) => {
+    return guessHistory.some(guess => 
+      guess.words.length === words.length &&
+      guess.words.every(word => words.includes(word)) &&
+      words.every(word => guess.words.includes(word))
+    );
+  };
 
   const selectWord = useCallback((word: string) => {
     if (isAnimating) return;
@@ -126,18 +135,25 @@ export function useConnections() {
             !newSolvedGroups.some(group => group.words.includes(word))
           );
 
-          setGameState(current => ({
-            ...current,
-            solvedGroups: newSolvedGroups,
-            allWords: [...solvedWords, ...remainingWords],
-            selectedWords: [],
-            gameStatus: newGameStatus,
-            guessHistory: [...current.guessHistory, {
-              words: [...prev.selectedWords],
-              isCorrect: true,
-              solvedGroup: matchingGroup
-            }]
-          }));
+          setGameState(current => {
+            // Check if this guess already exists
+            const guessAlreadyExists = guessExists(current.guessHistory, prev.selectedWords);
+            
+            return {
+              ...current,
+              solvedGroups: newSolvedGroups,
+              allWords: [...solvedWords, ...remainingWords],
+              selectedWords: [],
+              gameStatus: newGameStatus,
+              guessHistory: guessAlreadyExists 
+                ? current.guessHistory 
+                : [...current.guessHistory, {
+                    words: [...prev.selectedWords],
+                    isCorrect: true,
+                    solvedGroup: matchingGroup
+                  }]
+            };
+          });
           
           // Clean up animation
           setAnimatingWords([]);
@@ -157,16 +173,21 @@ export function useConnections() {
 
         const newMistakes = prev.mistakesRemaining - 1;
         const newGameStatus = newMistakes === 0 ? 'lost' : 'playing';
+        
+        // Check if this guess already exists
+        const guessAlreadyExists = guessExists(prev.guessHistory, prev.selectedWords);
 
         return {
           ...prev,
           selectedWords: [],
           mistakesRemaining: newMistakes,
           gameStatus: newGameStatus,
-          guessHistory: [...prev.guessHistory, {
-            words: [...prev.selectedWords],
-            isCorrect: false
-          }]
+          guessHistory: guessAlreadyExists 
+            ? prev.guessHistory 
+            : [...prev.guessHistory, {
+                words: [...prev.selectedWords],
+                isCorrect: false
+              }]
         };
       }
     });
