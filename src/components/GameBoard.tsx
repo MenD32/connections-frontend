@@ -17,7 +17,7 @@ const calculateTranslate = (fromIndex: number, toIndex: number) => {
   // Calculate translate values based on CSS grid gap
   // Each tile is now rectangular: full width, 4rem height + gap
   const containerWidth = 512; // Approximate max-width of container
-  const tileWidth = containerWidth / 4; // Width per column
+  const tileWidth = 130; // Width per column
   const tileHeight = 64 + 8; // 4rem (64px) height + 0.5rem (8px) gap
   
   const translateX = (toCol - fromCol) * tileWidth;
@@ -363,7 +363,7 @@ function SolvedGroup({ group, animate, delay }: {
 }) {
   return (
     <div
-      className={`p-2.5 rounded-lg text-center shadow-sm border transition-all duration-500 ${
+      className={`p-2.5 rounded-lg text-center shadow-sm border transition-all duration-500 border-0 ${
         animate ? 'animate-pop-up' : ''
       }`}
       style={{
