@@ -127,12 +127,14 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
       <div className="flex-1 p-4 pb-8">
         <div className="max-w-lg mx-auto space-y-6">
           {/* Instructions */}
-          <div className="text-center text-gray-700 font-medium">
-            <p>Create four groups of four!</p>
-          </div>
+          {gameState.gameStatus === 'playing' && (
+            <div className="text-center text-gray-700 font-medium">
+              <p>Create four groups of four!</p>
+            </div>
+          )}
 
           {/* Solved Groups */}
-          <div className="space-y-2">
+          <div className="space-y-2 mt-12">
             {gameState.solvedGroups.map((group, index) => (
               <SolvedGroup
                 key={group.category}
@@ -169,21 +171,23 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
           )}
 
           {/* Mistakes */}
-          <div className="text-center">
-            <div className="flex justify-center items-center gap-3 mb-6">
-              <span className="text-sm text-gray-600 font-medium">Mistakes remaining:</span>
-              <div className="flex gap-1">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                      i < gameState.mistakesRemaining ? 'bg-gray-400' : 'bg-gray-700 scale-110'
-                    }`}
-                  />
-                ))}
+          {gameState.gameStatus === 'playing' && (
+            <div className="text-center">
+              <div className="flex justify-center items-center gap-3 mb-6">
+                <span className="text-sm text-gray-600 font-medium">Mistakes remaining:</span>
+                <div className="flex gap-1">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                        i < gameState.mistakesRemaining ? 'bg-gray-400' : 'bg-gray-700 scale-110'
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Action Buttons */}
           {gameState.gameStatus === 'playing' && (
