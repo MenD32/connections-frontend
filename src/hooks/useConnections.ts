@@ -17,6 +17,7 @@ export function useConnections() {
   });
 
   const [lastGuessResult, setLastGuessResult] = useState<'correct' | 'incorrect' | null>(null);
+  const [newlySolvedGroup, setNewlySolvedGroup] = useState<string | null>(null);
   const [animatingWords, setAnimatingWords] = useState<{
     word: string;
     fromIndex: number;
@@ -111,6 +112,7 @@ export function useConnections() {
         setIsAnimating(true);
         setAnimatingWords(animations);
         setLastGuessResult('correct');
+        setNewlySolvedGroup(matchingGroup.category);
         
         // Wait for animation to complete, then update state
         setTimeout(() => {
@@ -134,6 +136,7 @@ export function useConnections() {
           // Clean up animation
           setAnimatingWords([]);
           setLastGuessResult(null);
+          setNewlySolvedGroup(null);
           setIsAnimating(false);
         }, 1000);
 
@@ -171,6 +174,7 @@ export function useConnections() {
       showHints: false
     });
     setLastGuessResult(null);
+    setNewlySolvedGroup(null);
     setAnimatingWords([]);
     setIsAnimating(false);
   }, []);
@@ -185,6 +189,7 @@ export function useConnections() {
   return {
     gameState,
     lastGuessResult,
+    newlySolvedGroup,
     animatingWords,
     isAnimating,
     selectWord,

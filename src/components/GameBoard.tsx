@@ -31,6 +31,7 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
   const {
     gameState,
     lastGuessResult,
+    newlySolvedGroup,
     animatingWords,
     isAnimating,
     selectWord,
@@ -110,9 +111,9 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
           <div className="space-y-2">
             {gameState.solvedGroups.map((group, index) => (
               <SolvedGroup
-                key={index}
+                key={group.category}
                 group={group}
-                animate={lastGuessResult === 'correct' && index === gameState.solvedGroups.length - 1}
+                animate={newlySolvedGroup === group.category}
                 delay={600}
               />
             ))}
@@ -219,7 +220,7 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
                 {gameState.groups
                   .filter(group => !gameState.solvedGroups.includes(group))
                   .map((group, index) => (
-                    <SolvedGroup key={index} group={group} animate={true} delay={index * 100} />
+                    <SolvedGroup key={group.category} group={group} animate={true} delay={index * 100} />
                   ))}
               </div>
 
@@ -307,7 +308,7 @@ function SolvedGroup({ group, animate, delay }: {
   return (
     <div
       className={`p-4 rounded-lg text-center shadow-sm border transition-all duration-500 ${
-        animate ? 'animate-form-group' : ''
+        animate ? 'animate-pop-up' : ''
       }`}
       style={{
         backgroundColor: group.color,
