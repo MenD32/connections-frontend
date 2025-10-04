@@ -29,10 +29,9 @@ export function ConnectionsLanding({ onStartGame }: ConnectionsLandingProps) {
         {/* Connections Icon */}
         <div className="mx-auto w-20 h-20 bg-white/20 rounded-lg flex items-center justify-center">
           <div className="grid grid-cols-2 gap-1 w-12 h-12">
+            <div className="bg-purple-100 rounded-sm"></div>
             <div className="bg-purple-200 rounded-sm"></div>
             <div className="bg-purple-300 rounded-sm"></div>
-            <div className="bg-purple-300 rounded-sm"></div>
-            <div className="bg-purple-400 rounded-sm"></div>
           </div>
         </div>
 
@@ -54,15 +53,6 @@ export function ConnectionsLanding({ onStartGame }: ConnectionsLandingProps) {
           >
             Play
           </Button>
-
-          <div className="space-y-3">
-            <Button
-              variant="outline"
-              className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20 rounded-full py-3"
-            >
-              How to Play
-            </Button>
-          </div>
         </div>
 
         {/* Game Info */}
