@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { GameState, WordGroup, GuessResult, PuzzleData } from '@/types/game';
 import { shuffleArray } from '@/data/puzzles';
 
-export function useConnections() {
+export function useConnections(initialDate?: string) {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -116,10 +116,10 @@ export function useConnections() {
     }
   }, []);
 
-  // Load today's puzzle on mount
+  // Load puzzle on mount (with initial date if provided)
   useEffect(() => {
-    loadPuzzle();
-  }, [loadPuzzle]);
+    loadPuzzle(initialDate);
+  }, [loadPuzzle, initialDate]);
 
   const [lastGuessResult, setLastGuessResult] = useState<'correct' | 'incorrect' | 'one-away' | null>(null);
   const [newlySolvedGroup, setNewlySolvedGroup] = useState<string | null>(null);

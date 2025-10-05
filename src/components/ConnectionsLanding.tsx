@@ -1,10 +1,15 @@
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { Calendar } from 'lucide-react';
 
 interface ConnectionsLandingProps {
-  onStartGame: () => void;
+  onStartGame: (date?: string) => void;
 }
 
 export function ConnectionsLanding({ onStartGame }: ConnectionsLandingProps) {
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string>('');
+
   const getCurrentDate = () => {
     const today = new Date();
     return today.toLocaleDateString('en-US', {
@@ -12,6 +17,22 @@ export function ConnectionsLanding({ onStartGame }: ConnectionsLandingProps) {
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  const formatDateForAPI = (dateStr: string) => {
+    // Convert YYYY-MM-DD to API format
+    return dateStr;
+  };
+
+  const handleDateSubmit = () => {
+    if (selectedDate) {
+      onStartGame(formatDateForAPI(selectedDate));
+    }
+  };
+
+  const getTodayDateString = () => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   };
 
   const getPuzzleNumber = () => {
@@ -48,11 +69,55 @@ export function ConnectionsLanding({ onStartGame }: ConnectionsLandingProps) {
         {/* Action Buttons */}
         <div className="space-y-4">
           <Button
-            onClick={onStartGame}
+            onClick={() => onStartGame()}
             className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 px-8 rounded-full text-lg"
           >
             Play
           </Button>
+          
+          <Button
+            onClick={() => setShowDatePicker(!showDatePicker)}
+            variant="outline"
+            className="w-full bg-white/10 border-white/20 hover:bg-white/20 text-white font-semibold py-3 px-8 rounded-full text-lg"
+          >
+            <Calendar className="w-5 h-5 mr-2" />
+            Choose Date
+          </Button>
+          
+          {showDatePicker && (
+            <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 space-y-3">
+              <div className="text-center">
+                <p className="text-gray-700 font-medium mb-2">Select a date:</p>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  max={getTodayDateString()}
+                  min="2023-06-12"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
+                />
+              </div>
+              <div className="flex space-x-2">
+                <Button
+                  onClick={handleDateSubmit}
+                  disabled={!selectedDate}
+                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  Play This Date
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowDatePicker(false);
+                    setSelectedDate('');
+                  }}
+                  variant="outline"
+                  className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Game Info */}

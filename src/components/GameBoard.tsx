@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { WordGroup } from '@/types/game';
 import { useConnections } from '@/hooks/useConnections';
-import { ChevronLeft, Shuffle, Share2, Check } from 'lucide-react';
+import { ChevronLeft, Shuffle, Share2, Check, Calendar } from 'lucide-react';
 import { generateShareText, copyToClipboard } from '@/lib/shareUtils';
 import { useState } from 'react';
 
@@ -27,10 +27,26 @@ const calculateTranslate = (fromIndex: number, toIndex: number) => {
 
 interface GameBoardProps {
   onBackToMenu: () => void;
+  initialDate?: string;
 }
 
-export function GameBoard({ onBackToMenu }: GameBoardProps) {
+export function GameBoard({ onBackToMenu, initialDate }: GameBoardProps) {
   const [copied, setCopied] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [tempDate, setTempDate] = useState<string>('');
+  
+  const getTodayDateString = () => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  };
+  
+  const handleDateChange = () => {
+    if (tempDate) {
+      loadPuzzle(tempDate);
+      setShowDatePicker(false);
+      setTempDate('');
+    }
+  };
   
   const {
     gameState,
@@ -47,7 +63,7 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
     submitGuess,
     resetGame,
     toggleHints
-  } = useConnections();
+  } = useConnections(initialDate);
 
   // Early returns for loading and error states
   if (isLoading) {
@@ -138,9 +154,55 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
             Back
           </Button>
 
-          <div className="text-center">
+          <div className="text-center relative">
             <h1 className="text-xl font-bold text-gray-900">Connections</h1>
-            <p className="text-xs text-gray-500">{gameState.puzzleDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            <button 
+              onClick={() => setShowDatePicker(!showDatePicker)}
+              className="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1 mx-auto transition-colors"
+            >
+              <Calendar className="w-3 h-3" />
+              {gameState.puzzleDate instanceof Date 
+                ? gameState.puzzleDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+                : gameState.puzzleDate
+              }
+            </button>
+            
+            {showDatePicker && (
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-20 min-w-[250px]">
+                <div className="text-center space-y-3">
+                  <p className="text-sm font-medium text-gray-700">Select a date:</p>
+                  <input
+                    type="date"
+                    value={tempDate}
+                    onChange={(e) => setTempDate(e.target.value)}
+                    max={getTodayDateString()}
+                    min="2023-06-12"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  />
+                  <div className="flex space-x-2">
+                    <Button
+                      onClick={handleDateChange}
+                      disabled={!tempDate}
+                      size="sm"
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      Load Puzzle
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setShowDatePicker(false);
+                        setTempDate('');
+                      }}
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <Button
