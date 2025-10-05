@@ -1,0 +1,36 @@
+name: Test Docker Build
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Test Docker build
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        platforms: linux/amd64
+        push: false
+        tags: connections-frontend:test
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Test container startup
+      run: |
+        docker run -d --name test-container -p 8080:80 -e CONNECTIONS_API_HOST=test.example.com connections-frontend:test
+        sleep 10
+        curl -f http://localhost:8080/ || exit 1
+        curl -f http://localhost:8080/config.js || exit 1
+        docker logs test-container
+        docker stop test-container

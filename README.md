@@ -123,7 +123,59 @@ curl -X 'GET' \
 
 ## Deployment
 
-### Environment Variables for Production
+### Docker Deployment (Recommended)
+
+This application includes a production-ready Docker setup with multi-environment support.
+
+#### Quick Start with Docker
+
+```bash
+# Build the image
+docker build -t connections-frontend .
+
+# Run with default settings (API at localhost:8000)
+docker run -p 80:80 connections-frontend
+
+# Run with custom API host
+docker run -p 80:80 -e CONNECTIONS_API_HOST=api.example.com:8080 connections-frontend
+```
+
+#### Multi-Environment Support
+
+The Docker image supports runtime configuration through environment variables:
+
+```bash
+# Development
+docker run -p 3000:80 -e CONNECTIONS_API_HOST=localhost:8000 connections-frontend
+
+# Staging
+docker run -p 80:80 -e CONNECTIONS_API_HOST=staging-api.example.com connections-frontend
+
+# Production
+docker run -p 80:80 -e CONNECTIONS_API_HOST=api.example.com connections-frontend
+```
+
+#### Docker Compose
+
+Use the included `docker-compose.yml` for easy deployment:
+
+```bash
+# Edit docker-compose.yml to set your API host
+docker-compose up -d
+```
+
+#### Container Registry
+
+Images are automatically built and published to GitHub Container Registry:
+
+```bash
+# Pull and run the latest image
+docker run -p 80:80 -e CONNECTIONS_API_HOST=your-api.com ghcr.io/mend32/connections-frontend:latest
+```
+
+### Traditional Deployment
+
+#### Environment Variables for Production
 
 Set the following environment variable in your production environment:
 
@@ -131,7 +183,7 @@ Set the following environment variable in your production environment:
 CONNECTIONS_API_HOST=your-api-host.com
 ```
 
-### Build
+#### Build
 
 ```bash
 npm run build
