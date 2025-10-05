@@ -21,7 +21,7 @@ export interface GameState {
   showHints: boolean;
   guessHistory: GuessResult[];
   puzzleNumber: number;
-  puzzleDate: string;
+  puzzleDate: Date;
 }
 
 export interface PuzzleData {

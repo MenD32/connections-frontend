@@ -140,7 +140,7 @@ export function GameBoard({ onBackToMenu }: GameBoardProps) {
 
           <div className="text-center">
             <h1 className="text-xl font-bold text-gray-900">Connections</h1>
-            <p className="text-xs text-gray-500">{gameState.puzzleDate}</p>
+            <p className="text-xs text-gray-500">{gameState.puzzleDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
           </div>
 
           <Button

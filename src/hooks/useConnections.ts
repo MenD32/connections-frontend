@@ -67,7 +67,7 @@ export function useConnections() {
       }
       
       interface ExternalPuzzleData {
-        date: string;
+        print_date: string;
         id: string;
         categories: ExternalCategory[];
       }
@@ -75,7 +75,7 @@ export function useConnections() {
       const typedExternalData = externalData as ExternalPuzzleData;
       
       const puzzleData: PuzzleData = {
-        date: new Date(typedExternalData.date).toLocaleDateString('en-US', {
+        date: new Date(typedExternalData.print_date).toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric'
@@ -106,7 +106,7 @@ export function useConnections() {
         showHints: false,
         guessHistory: [],
         puzzleNumber: puzzleData.puzzleNumber,
-        puzzleDate: puzzleData.date
+        puzzleDate: new Date(typedExternalData.print_date)
       });
     } catch (err) {
       console.error('Error loading puzzle:', err);
