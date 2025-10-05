@@ -158,6 +158,25 @@
     }
   }
 
+  @keyframes alreadyGuessedPopup {
+    0% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-10px) scale(0.9);
+    }
+    10% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+    90% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-10px) scale(0.9);
+    }
+  }
+
   @keyframes oneAwayPopup {
     0% {
       opacity: 0;
@@ -235,6 +254,10 @@
 
   .animate-one-away {
     animation: oneAwayPopup 1.5s ease-in-out forwards;
+  }
+
+  .animate-already-guessed {
+    animation: alreadyGuessedPopup 1.2s ease-in-out forwards;
   }
 
   .animate-fill-gaps {

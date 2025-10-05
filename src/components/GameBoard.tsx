@@ -141,6 +141,15 @@ export function GameBoard({ onBackToMenu, initialDate }: GameBoardProps) {
         </div>
       )}
 
+      {/* Already Guessed Pop-up */}
+      {lastGuessResult === 'already-guessed' && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-already-guessed">
+          <div className="bg-black text-white px-6 py-3 rounded-lg font-medium text-sm shadow-lg">
+            Already guessed!
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white border-b border-gray-200 p-4 sticky top-0 z-10">
         <div className="max-w-lg mx-auto flex items-center justify-between">
@@ -434,9 +443,7 @@ function SolvedGroup({ group, animate, delay }: {
 }) {
   return (
     <div
-      className={`p-2.5 rounded-lg text-center shadow-sm border transition-all duration-500 border-0 ${
-        animate ? 'animate-pop-up' : ''
-      }`}
+      className={`p-2.5 rounded-lg text-center shadow-sm border transition-all duration-500 border-0`}
       style={{
         backgroundColor: group.color,
         animationDelay: delay ? `${delay}ms` : '0ms'

@@ -121,7 +121,7 @@ export function useConnections(initialDate?: string) {
     loadPuzzle(initialDate);
   }, [loadPuzzle, initialDate]);
 
-  const [lastGuessResult, setLastGuessResult] = useState<'correct' | 'incorrect' | 'one-away' | null>(null);
+  const [lastGuessResult, setLastGuessResult] = useState<'correct' | 'incorrect' | 'one-away' | 'already-guessed' | null>(null);
   const [newlySolvedGroup, setNewlySolvedGroup] = useState<string | null>(null);
   const [animatingWords, setAnimatingWords] = useState<{
     word: string;
@@ -290,6 +290,17 @@ export function useConnections(initialDate?: string) {
           selectedWords: []
         };
       } else {
+        // Check if this guess has already been made
+        const guessAlreadyExists = guessExists(prev.guessHistory, prev.selectedWords);
+        if (guessAlreadyExists) {
+          setLastGuessResult('already-guessed');
+          setTimeout(() => setLastGuessResult(null), 1200);
+          return {
+            ...prev,
+            selectedWords: []
+          };
+        }
+
         // Check if the guess is "one away" from a correct group
         const oneAway = isOneAway(prev.selectedWords, prev.groups, prev.solvedGroups);
         
@@ -299,21 +310,16 @@ export function useConnections(initialDate?: string) {
 
         const newMistakes = prev.mistakesRemaining - 1;
         const newGameStatus = newMistakes === 0 ? 'lost' : 'playing';
-        
-        // Check if this guess already exists
-        const guessAlreadyExists = guessExists(prev.guessHistory, prev.selectedWords);
 
         return {
           ...prev,
           selectedWords: [],
           mistakesRemaining: newMistakes,
           gameStatus: newGameStatus,
-          guessHistory: guessAlreadyExists 
-            ? prev.guessHistory 
-            : [...prev.guessHistory, {
-                words: [...prev.selectedWords],
-                isCorrect: false
-              }]
+          guessHistory: [...prev.guessHistory, {
+            words: [...prev.selectedWords],
+            isCorrect: false
+          }]
         };
       }
     });
