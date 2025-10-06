@@ -29,3 +29,21 @@ export interface PuzzleData {
   puzzleNumber: number;
   groups: WordGroup[];
 }
+
+export interface UserStats {
+  gamesPlayed: number;
+  gamesWon: number;
+  winPercentage: number;
+  currentStreak: number;
+  maxStreak: number;
+  lastPlayedDate: string;
+  puzzleResults: { [puzzleId: string]: 'won' | 'lost' };
+}
+
+export interface GameResult {
+  puzzleId: string;
+  date: string;
+  won: boolean;
+  mistakesUsed: number;
+  timeToComplete?: number;
+}

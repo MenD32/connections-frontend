@@ -1,11 +1,14 @@
 import { useState, useCallback, useEffect } from 'react';
-import { GameState, WordGroup, GuessResult, PuzzleData } from '@/types/game';
+import { GameState, WordGroup, GuessResult, PuzzleData, UserStats, GameResult } from '@/types/game';
 import { shuffleArray } from '@/data/puzzles';
+import { loadUserStats, saveUserStats, updateStatsWithGameResult } from '@/lib/statsUtils';
 
 export function useConnections(initialDate?: string) {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userStats, setUserStats] = useState<UserStats>(loadUserStats());
+  const [gameStartTime, setGameStartTime] = useState<number | null>(null);
 
   // Function to load puzzle data from API
   const loadPuzzle = useCallback(async (date?: string) => {
@@ -113,6 +116,9 @@ export function useConnections(initialDate?: string) {
         puzzleNumber: puzzleData.puzzleNumber,
         puzzleDate: new Date(typedExternalData.print_date)
       });
+      
+      // Start the game timer
+      setGameStartTime(Date.now());
     } catch (err) {
       console.error('Error loading puzzle:', err);
       setError(err instanceof Error ? err.message : 'Failed to load puzzle');
@@ -125,6 +131,21 @@ export function useConnections(initialDate?: string) {
   useEffect(() => {
     loadPuzzle(initialDate);
   }, [loadPuzzle, initialDate]);
+
+  // Helper function to update stats when game ends
+  const updateGameStats = useCallback((won: boolean, mistakesUsed: number, puzzleId: string) => {
+    const gameResult: GameResult = {
+      puzzleId: puzzleId.toString(),
+      date: new Date().toISOString().split('T')[0],
+      won,
+      mistakesUsed,
+      timeToComplete: gameStartTime ? Date.now() - gameStartTime : undefined
+    };
+
+    const newStats = updateStatsWithGameResult(userStats, gameResult);
+    setUserStats(newStats);
+    saveUserStats(newStats);
+  }, [userStats, gameStartTime]);
 
   const [lastGuessResult, setLastGuessResult] = useState<'correct' | 'incorrect' | 'one-away' | 'already-guessed' | null>(null);
   const [newlySolvedGroup, setNewlySolvedGroup] = useState<string | null>(null);
@@ -267,6 +288,11 @@ export function useConnections(initialDate?: string) {
             // Check if this guess already exists
             const guessAlreadyExists = guessExists(current.guessHistory, prev.selectedWords);
             
+            // Update stats if game is won
+            if (newGameStatus === 'won') {
+              updateGameStats(true, 4 - current.mistakesRemaining, current.puzzleNumber.toString());
+            }
+            
             return {
               ...current,
               solvedGroups: newSolvedGroups,
@@ -316,6 +342,11 @@ export function useConnections(initialDate?: string) {
         const newMistakes = prev.mistakesRemaining - 1;
         const newGameStatus = newMistakes === 0 ? 'lost' : 'playing';
 
+        // Update stats if game is lost
+        if (newGameStatus === 'lost') {
+          updateGameStats(false, 4 - newMistakes, prev.puzzleNumber.toString());
+        }
+
         return {
           ...prev,
           selectedWords: [],
@@ -335,6 +366,7 @@ export function useConnections(initialDate?: string) {
     setNewlySolvedGroup(null);
     setAnimatingWords([]);
     setIsAnimating(false);
+    setGameStartTime(null);
     loadPuzzle();
   }, [loadPuzzle]);
 
@@ -350,6 +382,7 @@ export function useConnections(initialDate?: string) {
 
   return {
     gameState,
+    userStats,
     isLoading,
     error,
     loadPuzzle,

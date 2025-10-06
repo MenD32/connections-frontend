@@ -3,6 +3,7 @@ import { WordGroup } from '@/types/game';
 import { useConnections } from '@/hooks/useConnections';
 import { ChevronLeft, Shuffle, Share2, Check, Calendar } from 'lucide-react';
 import { generateShareText, copyToClipboard } from '@/lib/shareUtils';
+import { EndGameStatsWidget } from '@/components/ui/EndGameStatsWidget';
 import { useState } from 'react';
 
 // Helper function to calculate translation between grid positions
@@ -50,6 +51,7 @@ export function GameBoard({ onBackToMenu, initialDate }: GameBoardProps) {
   
   const {
     gameState,
+    userStats,
     isLoading,
     error,
     loadPuzzle,
@@ -331,6 +333,12 @@ export function GameBoard({ onBackToMenu, initialDate }: GameBoardProps) {
                 <h2 className="text-3xl font-bold text-green-600 mb-2 animate-bounce">Perfect!</h2>
                 <p className="text-gray-600">You solved today's puzzle!</p>
               </div>
+              
+              {/* Stats Widget */}
+              {userStats && (
+                <EndGameStatsWidget stats={userStats} className="max-w-sm mx-auto" />
+              )}
+              
               <div className="flex justify-center">
                 <Button
                   onClick={handleShare}
@@ -368,6 +376,11 @@ export function GameBoard({ onBackToMenu, initialDate }: GameBoardProps) {
                     <SolvedGroup key={group.category} group={group} animate={true} delay={index * 100} />
                   ))}
               </div>
+
+              {/* Stats Widget */}
+              {userStats && (
+                <EndGameStatsWidget stats={userStats} className="max-w-sm mx-auto" />
+              )}
 
               <div className="flex justify-center">
                 <Button

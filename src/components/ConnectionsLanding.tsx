@@ -1,14 +1,18 @@
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import { Calendar } from 'lucide-react';
+import { Calendar, BarChart3 } from 'lucide-react';
+import { UserStats } from '@/types/game';
+import { StatsModal } from '@/components/ui/StatsDisplay';
 
 interface ConnectionsLandingProps {
   onStartGame: (date?: string) => void;
+  userStats?: UserStats;
 }
 
-export function ConnectionsLanding({ onStartGame }: ConnectionsLandingProps) {
+export function ConnectionsLanding({ onStartGame, userStats }: ConnectionsLandingProps) {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>('');
+  const [showStats, setShowStats] = useState(false);
 
   const getCurrentDate = () => {
     const today = new Date();
@@ -75,14 +79,27 @@ export function ConnectionsLanding({ onStartGame }: ConnectionsLandingProps) {
             Play
           </Button>
           
-          <Button
-            onClick={() => setShowDatePicker(!showDatePicker)}
-            variant="outline"
-            className="w-full bg-white/10 border-white/20 hover:bg-white/20 text-white font-semibold py-3 px-8 rounded-full text-lg"
-          >
-            <Calendar className="w-5 h-5 mr-2" />
-            Choose Date
-          </Button>
+          <div className="flex space-x-2">
+            <Button
+              onClick={() => setShowDatePicker(!showDatePicker)}
+              variant="outline"
+              className="flex-1 bg-white/10 border-white/20 hover:bg-white/20 text-white font-semibold py-3 px-4 rounded-full text-lg"
+            >
+              <Calendar className="w-5 h-5 mr-2" />
+              Choose Date
+            </Button>
+            
+            {userStats && (
+              <Button
+                onClick={() => setShowStats(true)}
+                variant="outline"
+                className="flex-1 bg-white/10 border-white/20 hover:bg-white/20 text-white font-semibold py-3 px-4 rounded-full text-lg"
+              >
+                <BarChart3 className="w-5 h-5 mr-2" />
+                Stats
+              </Button>
+            )}
+          </div>
           
           {showDatePicker && (
             <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 space-y-3">
@@ -125,7 +142,31 @@ export function ConnectionsLanding({ onStartGame }: ConnectionsLandingProps) {
           <p className="text-sm">{getCurrentDate()}</p>
           <p className="text-sm">No. {getPuzzleNumber()}</p>
         </div>
+
+        {/* Quick Stats */}
+        {userStats && userStats.gamesPlayed > 0 && (
+          <div className="text-center text-purple-100 space-y-1 mt-4">
+            <div className="text-xs opacity-80">Your Stats</div>
+            <div className="text-sm">
+              {userStats.gamesWon}/{userStats.gamesPlayed} won ({userStats.winPercentage}%)
+            </div>
+            {userStats.currentStreak > 0 && (
+              <div className="text-xs">
+                Current streak: {userStats.currentStreak}
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Stats Modal */}
+      {userStats && (
+        <StatsModal
+          stats={userStats}
+          isOpen={showStats}
+          onClose={() => setShowStats(false)}
+        />
+      )}
     </div>
   );
 }
