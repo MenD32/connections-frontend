@@ -37,14 +37,13 @@ export function AboutPage({ onBack }: AboutPageProps) {
             About Connections
           </h1>
           <p className="text-purple-100 text-lg">
-            An open-source remake of the popular word puzzle
+            An open-source remake of The New York Times Connections puzzle game
           </p>
         </div>
 
         {/* Description */}
         <div className="space-y-4 text-purple-100">
           <p className="text-sm leading-relaxed">
-            An open-source remake of The New York Times Connections puzzle game. 
             Find groups of four words that share something in common across four 
             different difficulty levels.
           </p>
@@ -72,25 +71,13 @@ export function AboutPage({ onBack }: AboutPageProps) {
             View on GitHub
           </Button>
           
-          <div className="flex gap-2">
-            <Button
-              onClick={() => window.open('https://github.com/MenD32/connections-frontend/issues/new?template=bug_report.md', '_blank')}
-              variant="outline"
-              className="flex-1 bg-white/10 border-white/20 hover:bg-white/20 text-white text-sm py-2 px-4 rounded-full flex items-center justify-center gap-2"
-            >
-              <Bug className="w-4 h-4" />
-              Report Bug
-            </Button>
-            
-            <Button
-              onClick={() => window.open('https://github.com/MenD32/connections-frontend/issues/new?template=feature_request.md', '_blank')}
-              variant="outline"
-              className="flex-1 bg-white/10 border-white/20 hover:bg-white/20 text-white text-sm py-2 px-4 rounded-full flex items-center justify-center gap-2"
-            >
-              <Code className="w-4 h-4" />
-              Request Feature
-            </Button>
-          </div>
+          <button
+            onClick={() => window.open('https://github.com/MenD32/connections-frontend/issues/new', '_blank')}
+            className="text-purple-200 hover:text-white text-sm underline transition-colors flex items-center justify-center gap-2"
+          >
+            <Bug className="w-4 h-4" />
+            Report a bug or request a feature
+          </button>
           
           <p className="text-purple-200 text-xs">
             Open source • MIT License • Contributions welcome
