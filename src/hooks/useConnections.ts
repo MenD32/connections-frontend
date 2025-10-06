@@ -57,7 +57,9 @@ export function useConnections(initialDate?: string) {
       
       // Type the external API response
       interface ExternalCard {
-        content: string;
+        content?: string; // For text-based cards
+        image_alt_text?: string; // For image-based cards (symbols, etc.)
+        image_url?: string; // For visual cards
         position: number;
       }
       
@@ -68,7 +70,7 @@ export function useConnections(initialDate?: string) {
       
       interface ExternalPuzzleData {
         print_date: string;
-        id: string;
+        id: string | number;
         categories: ExternalCategory[];
       }
       
@@ -80,14 +82,17 @@ export function useConnections(initialDate?: string) {
           month: 'long',
           day: 'numeric'
         }),
-        puzzleNumber: parseInt(typedExternalData.id) || 1,
+        puzzleNumber: typeof typedExternalData.id === 'string' ? parseInt(typedExternalData.id) || 1 : typedExternalData.id,
         groups: typedExternalData.categories.map((category, index: number) => {
           // Sort cards by position to get original word order
           const sortedCards = [...category.cards].sort((a, b) => a.position - b.position);
           
           return {
             category: category.title,
-            words: sortedCards.map((card) => card.content),
+            words: sortedCards.map((card) => {
+              // Use image_alt_text for symbol-based puzzles, fallback to content for text-based
+              return card.image_alt_text || card.content || '';
+            }).filter(word => word !== ''), // Remove any empty strings
             difficulty: difficultyMap[index] || 'easy',
             color: colorMap[difficultyMap[index] || 'easy']
           };
