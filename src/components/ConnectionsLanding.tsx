@@ -142,21 +142,6 @@ export function ConnectionsLanding({ onStartGame, userStats }: ConnectionsLandin
           <p className="text-sm">{getCurrentDate()}</p>
           <p className="text-sm">No. {getPuzzleNumber()}</p>
         </div>
-
-        {/* Quick Stats */}
-        {userStats && userStats.gamesPlayed > 0 && (
-          <div className="text-center text-purple-100 space-y-1 mt-4">
-            <div className="text-xs opacity-80">Your Stats</div>
-            <div className="text-sm">
-              {userStats.gamesWon}/{userStats.gamesPlayed} won ({userStats.winPercentage}%)
-            </div>
-            {userStats.currentStreak > 0 && (
-              <div className="text-xs">
-                Current streak: {userStats.currentStreak}
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Stats Modal */}

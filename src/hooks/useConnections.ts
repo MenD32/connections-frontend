@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { GameState, WordGroup, GuessResult, PuzzleData, UserStats, GameResult } from '@/types/game';
 import { shuffleArray } from '@/data/puzzles';
-import { loadUserStats, saveUserStats, updateStatsWithGameResult } from '@/lib/statsUtils';
+import { loadUserStats, saveUserStats, updateStatsWithGameResult, getPuzzleResult } from '@/lib/statsUtils';
 
 export function useConnections(initialDate?: string) {
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -104,21 +104,28 @@ export function useConnections(initialDate?: string) {
       
       // Initialize game state with fetched puzzle data
       const allWords = shuffleArray(puzzleData.groups.flatMap(group => group.words));
+      
+      // Check if this puzzle has already been completed
+      const puzzleResult = getPuzzleResult(userStats, puzzleData.puzzleNumber.toString());
+      const isAlreadyCompleted = puzzleResult === 'won';
+      
       setGameState({
         groups: puzzleData.groups,
         allWords,
         selectedWords: [],
-        solvedGroups: [],
-        mistakesRemaining: 4,
-        gameStatus: 'playing',
+        solvedGroups: isAlreadyCompleted ? puzzleData.groups : [], // Show all groups as solved if already won
+        mistakesRemaining: isAlreadyCompleted ? 0 : 4,
+        gameStatus: isAlreadyCompleted ? 'won' : 'playing',
         showHints: false,
         guessHistory: [],
         puzzleNumber: puzzleData.puzzleNumber,
         puzzleDate: new Date(typedExternalData.print_date)
       });
       
-      // Start the game timer
-      setGameStartTime(Date.now());
+      // Start the game timer only if not already completed
+      if (!isAlreadyCompleted) {
+        setGameStartTime(Date.now());
+      }
     } catch (err) {
       console.error('Error loading puzzle:', err);
       setError(err instanceof Error ? err.message : 'Failed to load puzzle');
@@ -383,6 +390,7 @@ export function useConnections(initialDate?: string) {
   return {
     gameState,
     userStats,
+    gameStartTime,
     isLoading,
     error,
     loadPuzzle,

@@ -4,6 +4,7 @@ import { useConnections } from '@/hooks/useConnections';
 import { ChevronLeft, Shuffle, Share2, Check, Calendar } from 'lucide-react';
 import { generateShareText, copyToClipboard } from '@/lib/shareUtils';
 import { EndGameStatsWidget } from '@/components/ui/EndGameStatsWidget';
+import { getPuzzleResult } from '@/lib/statsUtils';
 import { useState } from 'react';
 
 // Helper function to calculate translation between grid positions
@@ -52,6 +53,7 @@ export function GameBoard({ onBackToMenu, initialDate }: GameBoardProps) {
   const {
     gameState,
     userStats,
+    gameStartTime,
     isLoading,
     error,
     loadPuzzle,
@@ -121,6 +123,9 @@ export function GameBoard({ onBackToMenu, initialDate }: GameBoardProps) {
   };
 
   const canSubmit = gameState.selectedWords.length === 4 && gameState.gameStatus === 'playing' && !isAnimating;
+  
+  // Check if this puzzle was previously completed
+  const isPreviouslyCompleted = userStats && getPuzzleResult(userStats, gameState.puzzleNumber.toString()) === 'won' && gameStartTime === null;
 
   const handleShare = async () => {
     const shareText = generateShareText(gameState, gameState.puzzleNumber);
@@ -230,9 +235,17 @@ export function GameBoard({ onBackToMenu, initialDate }: GameBoardProps) {
       <div className="flex-1 p-4 pb-8">
         <div className="max-w-lg mx-auto space-y-6">
           {/* Instructions */}
-          {gameState.gameStatus === 'playing' && (
+          {gameState.gameStatus === 'playing' && !isPreviouslyCompleted && (
             <div className="text-center text-gray-700 font-medium">
               <p>Create four groups of four!</p>
+            </div>
+          )}
+          
+          {/* Previously Completed Message */}
+          {isPreviouslyCompleted && (
+            <div className="text-center text-gray-600 font-medium">
+              <p>You've already solved this puzzle!</p>
+              <p className="text-sm text-gray-500 mt-1">Here's the solution you found:</p>
             </div>
           )}
 
@@ -266,8 +279,9 @@ export function GameBoard({ onBackToMenu, initialDate }: GameBoardProps) {
                     word={word}
                     isSelected={isWordSelected(word)}
                     animation={getWordAnimation(word)}
-                    onClick={() => selectWord(word)}
+                    onClick={() => !isPreviouslyCompleted && selectWord(word)}
                     shake={(lastGuessResult === 'incorrect' || lastGuessResult === 'one-away') && isWordSelected(word)}
+                    disabled={isPreviouslyCompleted}
                   />
                 ))}
             </div>
@@ -293,7 +307,7 @@ export function GameBoard({ onBackToMenu, initialDate }: GameBoardProps) {
           )}
 
           {/* Action Buttons */}
-          {gameState.gameStatus === 'playing' && (
+          {gameState.gameStatus === 'playing' && !isPreviouslyCompleted && (
             <div className="flex justify-center gap-3 flex-wrap">
               <Button
                 onClick={shuffleWords}
@@ -330,8 +344,19 @@ export function GameBoard({ onBackToMenu, initialDate }: GameBoardProps) {
           {gameState.gameStatus === 'won' && (
             <div className="text-center space-y-6 py-8 animate-fade-in">
               <div>
-                <h2 className="text-3xl font-bold text-green-600 mb-2 animate-bounce">Perfect!</h2>
-                <p className="text-gray-600">You solved today's puzzle!</p>
+                {isPreviouslyCompleted ? (
+                  // Previously completed puzzle
+                  <>
+                    <h2 className="text-3xl font-bold text-blue-600 mb-2">Already Solved!</h2>
+                    <p className="text-gray-600">You've already completed this puzzle.</p>
+                  </>
+                ) : (
+                  // Newly completed puzzle
+                  <>
+                    <h2 className="text-3xl font-bold text-green-600 mb-2 animate-bounce">Perfect!</h2>
+                    <p className="text-gray-600">You solved today's puzzle!</p>
+                  </>
+                )}
               </div>
               
               {/* Stats Widget */}
@@ -409,12 +434,13 @@ export function GameBoard({ onBackToMenu, initialDate }: GameBoardProps) {
   );
 }
 
-function WordTile({ word, isSelected, animation, onClick, shake }: {
+function WordTile({ word, isSelected, animation, onClick, shake, disabled }: {
   word: string;
   isSelected: boolean;
   animation?: { word: string; fromIndex: number; toIndex: number; };
   onClick: () => void;
   shake?: boolean;
+  disabled?: boolean;
 }) {
   const isAnimating = !!animation;
   
@@ -430,16 +456,18 @@ function WordTile({ word, isSelected, animation, onClick, shake }: {
   return (
     <button
       onClick={onClick}
-      disabled={isAnimating}
+      disabled={isAnimating || disabled}
       className={`
         h-16 w-full rounded-lg font-bold text-sm transition-all duration-200
         flex items-center justify-center text-center leading-tight
-        ${isSelected
-          ? 'bg-gray-800 text-white shadow-lg transform scale-95 border-2 border-gray-900'
-          : 'bg-gray-100 text-gray-900 hover:bg-gray-200 border-2 border-transparent hover:shadow-md active:scale-95'
+        ${disabled 
+          ? 'bg-gray-100 text-gray-500 cursor-not-allowed' 
+          : isSelected
+            ? 'bg-gray-800 text-white shadow-lg transform scale-95 border-2 border-gray-900'
+            : 'bg-gray-100 text-gray-900 hover:bg-gray-200 border-2 border-transparent hover:shadow-md active:scale-95'
         }
         ${shake ? 'animate-shake' : ''}
-        ${isAnimating ? 'animate-slide-to-position' : 'hover:scale-105 active:scale-95'}
+        ${isAnimating ? 'animate-slide-to-position' : (!disabled ? 'hover:scale-105 active:scale-95' : '')}
         ${isAnimating ? 'z-20' : ''}
       `}
       style={isAnimating ? animationStyle : {}}
