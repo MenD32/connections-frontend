@@ -4,6 +4,7 @@ import { useConnections } from '@/hooks/useConnections';
 import { ChevronLeft, Shuffle, Share2, Check, Calendar } from 'lucide-react';
 import { generateShareText, copyToClipboard } from '@/lib/shareUtils';
 import { EndGameStatsWidget } from '@/components/ui/EndGameStatsWidget';
+import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { getPuzzleResult } from '@/lib/statsUtils';
 import { useState } from 'react';
 
@@ -71,16 +72,7 @@ export function GameBoard({ onBackToMenu, initialDate }: GameBoardProps) {
 
   // Early returns for loading and error states
   if (isLoading) {
-    return (
-      <div className="w-full max-w-2xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading puzzle...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading puzzle..." />;
   }
 
   if (error) {
@@ -198,11 +190,11 @@ export function GameBoard({ onBackToMenu, initialDate }: GameBoardProps) {
                   <div className="flex space-x-2">
                     <Button
                       onClick={handleDateChange}
-                      disabled={!tempDate}
+                      disabled={!tempDate || isLoading}
                       size="sm"
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
                     >
-                      Load Puzzle
+                      {isLoading ? 'Loading...' : 'Load Puzzle'}
                     </Button>
                     <Button
                       onClick={() => {
