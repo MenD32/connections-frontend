@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react';
 import { ConnectionsLanding } from '@/components/ConnectionsLanding';
 import { GameBoard } from '@/components/GameBoard';
+import { AboutPage } from '@/components/AboutPage';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { UserStats } from '@/types/game';
 import { loadUserStats } from '@/lib/statsUtils';
 
 export default function Home() {
-  const [gameStarted, setGameStarted] = useState(false);
+  const [currentView, setCurrentView] = useState<'landing' | 'game' | 'about'>('landing');
   const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -27,14 +28,22 @@ export default function Home() {
 
   const handleStartGame = (date?: string) => {
     setSelectedDate(date);
-    setGameStarted(true);
+    setCurrentView('game');
   };
 
   const handleBackToMenu = () => {
-    setGameStarted(false);
+    setCurrentView('landing');
     setSelectedDate(undefined);
     // Reload stats when returning to menu (in case they were updated)
     setUserStats(loadUserStats());
+  };
+
+  const handleShowAbout = () => {
+    setCurrentView('about');
+  };
+
+  const handleBackFromAbout = () => {
+    setCurrentView('landing');
   };
 
   // Show loading screen while initial data loads
@@ -44,16 +53,23 @@ export default function Home() {
 
   return (
     <div>
-      {!gameStarted ? (
+      {currentView === 'landing' && (
         <ConnectionsLanding 
           onStartGame={handleStartGame}
+          onShowAbout={handleShowAbout}
           userStats={userStats || undefined}
         />
-      ) : (
+      )}
+      
+      {currentView === 'game' && (
         <GameBoard 
           onBackToMenu={handleBackToMenu} 
           initialDate={selectedDate}
         />
+      )}
+      
+      {currentView === 'about' && (
+        <AboutPage onBack={handleBackFromAbout} />
       )}
     </div>
   );

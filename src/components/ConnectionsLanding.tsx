@@ -6,10 +6,11 @@ import { StatsModal } from '@/components/ui/StatsDisplay';
 
 interface ConnectionsLandingProps {
   onStartGame: (date?: string) => void;
+  onShowAbout: () => void;
   userStats?: UserStats;
 }
 
-export function ConnectionsLanding({ onStartGame, userStats }: ConnectionsLandingProps) {
+export function ConnectionsLanding({ onStartGame, onShowAbout, userStats }: ConnectionsLandingProps) {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [showStats, setShowStats] = useState(false);
@@ -142,6 +143,14 @@ export function ConnectionsLanding({ onStartGame, userStats }: ConnectionsLandin
           <p className="text-sm">{getCurrentDate()}</p>
           <p className="text-sm">No. {getPuzzleNumber()}</p>
         </div>
+        
+        {/* About Link */}
+        <button
+          onClick={onShowAbout}
+          className="text-purple-200 hover:text-white text-sm underline transition-colors"
+        >
+          About this game
+        </button>
       </div>
 
       {/* Stats Modal */}
